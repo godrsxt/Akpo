@@ -1,1 +1,37 @@
 
+name: Unzip Webview Master
+
+# Trigger on push to main or manually via the Actions tab
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  unzip-and-commit:
+    runs-on: ubuntu-latest
+    
+    # Permissions required to push changes back to the repo
+    permissions:
+      contents: write
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Unzip the file
+      # "-o" overwrites existing files without asking
+      # "-d" specifies the destination folder (optional, remove "-d output_folder" to unzip in root)
+      - name: Unzip Archive
+        run: unzip -o webview-master.zip -d output_folder
+
+      # Step 3: Commit and Push changes back to GitHub
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add .
+          # The commit will fail if there are no changes, so we add a check
+          git diff-index --quiet HEAD || git commit -m "Auto-unzipped webview-master.zip"
+          git push
